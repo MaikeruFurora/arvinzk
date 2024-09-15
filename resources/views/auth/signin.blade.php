@@ -7,20 +7,30 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/login/style.css') }}">
-
 </head>
 <body>
   <div class="login-container">
+    @if (session()->has('msg'))
+        <div class="alert p-2 text-center alert-{{ session()->get('action') ?? 'success' }}" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> {{ session()->get('msg') }}
+        </div>
+    @endif
     <h5 class="text-center mb-4">Sign In</h5>
     <form method="POST" action="{{ route('auth.login.post') }}" autocomplete="off">
       @csrf
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" placeholder="" required>
+        <input type="text" class="form-control" id="username" name="username" placeholder="" required autofocus>
+        @error('username')
+          <small class="text-danger">{{ $message }}</small>
+        @enderror
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" placeholder="" required>
+        <input type="password" class="form-control" id="password" name="password" placeholder="" required>
+        @error('username')
+          <small class="text-danger">{{ $message }}</small>
+        @enderror
       </div>
       <button type="submit" class="btn btn-dark w-100">Login</button>
       <a href="#" class="d-block text-center mt-3 forgot-password">Forgot password?</a>

@@ -5,6 +5,7 @@ namespace App\Services;
 // use App\Helper\Helper;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -37,28 +38,28 @@ class AuthService{
     public function userRoute($credentials,$data,$errorM){
 
         if (Auth::guard('web')->attempt($credentials)) {
-           
-            // Helper::auditLog('Logged In','Logged In');
-            if (auth()->user()->is_active=='YES') {
-                switch (auth()->user()->type) {
-                    case 'bdo':
-                            return redirect()->route('authenticate.activity');
-                        break;
-                    case 'supervisor':
-                            return redirect()->route('authenticate.supervisor');
-                        break;
-                    case 'admin':
-                            return redirect()->route('authenticate.admin');
-                        break;
-                    
-                    default:
-                    // return redirect()->route('authenticate.activity');
-                        break;
-                }
-            }else{
+            if (auth()->user()->active) {
+                    if (!empty(auth()->user()->user_type_id)) {
+                        $userTypeName = strtolower(auth()->user()->user_type->name);
+                        $route = "app.$userTypeName.home";
+                        try {
+                            // Try generating the route
+                            return redirect()->route($route);
+                        } catch (\Exception $e) {
+                            // Route does not exist
+                            Auth::guard('web')->logout();
+                            return back()->with(['msg' => 'The user type route does not exist, please contact your administrator', 'action' => 'warning']);
+                        }
+                    } else {
+                        Auth::guard('web')->logout();
+                        return back()->with(['msg' => 'User type is not assigned, please contact your administrator', 'action' => 'warning']);
+                    }
+              
+            } else {
                 Auth::guard('web')->logout();
-                return back()->with(['msg'=>'Your account is not active','action'=>'warning']);
+                return back()->with(['msg' => 'Your account is not active', 'action' => 'warning']);
             }
+            
 
         }else{
             
@@ -76,7 +77,7 @@ class AuthService{
 
             Auth::guard('web')->logout();
 
-            return redirect()->route('auth.signin');
+            return redirect()->route('auth.login');
 
         }
 

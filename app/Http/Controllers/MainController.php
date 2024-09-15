@@ -2,30 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Jmrashed\Zkteco\Lib\ZKTeco;
 
 class MainController extends Controller
 {
 
-    protected $zk;
-    protected $ip;
+public function checkUtilityNeeded()
+{
+    // Retrieve the first configuration that matches the criteria
+    $config = Config::where('user_id', /* specify the group_id value here */)
+                    ->where('active', 1)
+                    ->whereNotNull('ip')
+                    ->whereNotNull('port')
+                    ->first();
 
-    public function __construct($zk, $ip,$port)
-    {
-        $this->zk  = new ZKTeco($ip,$port);
+    // Check if the configuration was found
+    if (empty($config)) {
+        return [
+            'message' => 'No configuration found. Please check your configurations.',
+            'status'  => false,
+        ];
     }
-     
-    public function index()
-    {
 
-        $connection = $this->zk->connect();
+    // Check if the 'socket_create' function exists
+    if (!function_exists('socket_create')) {
+        return [
+            'message' => 'Socket not supported. Please Check your Socket Configuration (PHP extension).',
+            'status'  => false,
+        ];
+    }
 
-        if ($connection) {
-            echo "connted na siya";
-        }else{
-            echo "Connection failed";
-        }
+    // If everything is okay, return a success response
+    return [
+        'message' => 'Configuration is valid and socket is supported.',
+        'status'  => true,
+    ];
+}
+
+public function index()
+{
+    $checkUtilityNeeded = $this->checkUtilityNeeded();
+    
+    return view('app.user.index', ['checkUtilityNeeded' => $checkUtilityNeeded]);
+
+        
+        // $this->zk = new ZKTeco('192.168.3.34');
+        // $connection = $this->zk->connect();
+
+        // if ($connection) {
+        //     echo "connted na siya";
+        // }else{
+        //     echo "Connection failed";
+        // }
 
         // if (function_exists('socket_create')) {
 
@@ -97,51 +127,6 @@ class MainController extends Controller
     //     // $employee = Employee::find($employeeId);
     //     // return $employee ? $employee->name : 'Unknown';
     // }
-    
-
-    public function searchIP()
-    {
-        // Define network range and port
-        // $network = '192.168.3.0/24';
-        $network = '192.168.0.0/22'; // This covers 192.168.0.0 to 192.168.3.255
-
-        $port = 4370; // Port to scan
-    
-        // Define the Nmap command with optimizations
-        $command = "nmap -p $port -T4 -n --open $network -oG -";
-    
-        // Execute the command and capture the output
-        exec($command, $output, $return_var);
-    
-        // Check if the command was successful
-        if ($return_var !== 0) {
-            echo "Error executing Nmap command.";
-            exit;
-        }
-    
-        // Process the output
-        $foundIPs = [];
-        foreach ($output as $line) {
-            // Check if the line contains the open port information
-            if (strpos($line, "/open/") !== false) {
-                // Extract the IP address from the line
-                preg_match('/(\d+\.\d+\.\d+\.\d+)/', $line, $matches);
-                if (isset($matches[1])) {
-                    $foundIPs[] = $matches[1];
-                }
-            }
-        }
-    
-        // Output the results
-        if (empty($foundIPs)) {
-            echo "No devices with port $port open found.";
-        } else {
-            echo "Found devices with port $port open:\n";
-            foreach ($foundIPs as $ip) {
-                echo "IP: $ip\n";
-            }
-        }
-    }
     
         
 }

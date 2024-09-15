@@ -18,8 +18,7 @@ class AuthController extends Controller
     }
 
     public function index(){
-        // return view('auth/signin');
-        return view('app/index');
+        return view('auth.signin'); 
     }
 
     public function loginPost(LoginRequest $request){
@@ -28,7 +27,7 @@ class AuthController extends Controller
 
     }
 
-    public function signOut(){
+    public function logout(){
 
         return $this->authService->signOut();
         

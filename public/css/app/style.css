@@ -10,15 +10,15 @@ body {
   }
 
    /* Custom font size for DataTables labels and text */
-#dataTable {
+.table-sm {
     font-size: 0.75rem; /* Adjust font size for table */
 }
 
-#dataTable thead th {
+.table-sm thead th {
     font-size: 0.75rem; /* Adjust font size for table headers */
 }
 
-#dataTable tbody td {
+.table-sm tbody td {
     font-size: 0.85rem; /* Adjust font size for table cells */
 }
 
@@ -43,4 +43,15 @@ body {
 .dataTables_wrapper .dataTables_filter input {
     font-size: 0.85rem; /* Adjust font size for search input */
     height: calc(1.5em + 0.85rem + 2px); /* Adjust height for search input */
+}
+
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    font-size: 0.70rem; /* Adjust font size for 'entries per page' and 'search' */
+}
+
+.dataTables_info {
+    font-size: 0.5rem; /* Adjust the font size as needed */
+    color: #333; /* Optional: Change the text color */
 }

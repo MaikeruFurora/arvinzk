@@ -8,25 +8,25 @@
         <ul class="navbar-nav">
          
           @if (strtolower(auth()->user()->user_type->name[0])==='u')
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.user.home') }}">Record</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.user.config.user.device') }}">Create User To Device</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.user.config') }}">Config</a>
-          </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.user.home') }}">Record</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.user.config.user.device') }}">Create User To Device</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.user.config') }}">Config</a>
+            </li>
           @else
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.admin.home') }}">Device Config</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.admin.group') }}">Group</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('app.admin.user') }}">Users</a>
-          </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.admin.home') }}">Device Config</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.admin.group') }}">Group</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('app.admin.user') }}">Users</a>
+            </li>
           @endif
           <li class="nav-item">
             <a class="nav-link text-danger" href="{{ route('app.logout') }}">Logout</a>

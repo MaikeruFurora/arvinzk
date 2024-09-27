@@ -42,7 +42,7 @@
                     searchable: false,
                     orderable: false,
                     render: function(data, type, row) {
-                        return '<button class="btn btn-dark btn-sm px-3">Edit</button>';
+                        return '<button class="btn btn-dark btn-sm px-3 edit">Edit</button>';
                     }
                 }
             ]

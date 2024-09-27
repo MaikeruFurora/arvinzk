@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Group;
 use Illuminate\Http\Request;
 use App\Models\Config;
+use App\Traits\InitializesZKTeco;
+use Jmrashed\Zkteco\Lib\ZKTeco;
+use Throwable;
 
 class ConfigController extends Controller
 {
-    protected $ip;
-    protected $port;
+
+    use InitializesZKTeco;
 
     public function index(){
         return view('app.user.config.index');
@@ -24,25 +27,32 @@ class ConfigController extends Controller
 
     public function searchIPWithPort(Request $request){
     
+
+        $output = [];
+        exec('arp -a', $output);
+
+        // Display the output
+        foreach ($output as $line) {
+            $line . "<br>";
+        }
+
+        return response()->json([
+            'message' => $line,
+            'status'  => true,
+        ]);
         // Define network range and port
         // $network = '192.168.3.0/24';
         $ipRequest   = $request->ip;
         $portRequest = $request->port;
         $foundIPs    = [];
 
-        if (empty($ipRequest)) {
-            $this->ip = $ipRequest;
-        }else{
-            $this->ip = '192.168.0.0/22'; // This covers 192.168.0.0 to 192.168.3.255
-        }
+        $ip = $ipRequest ?? '192.168.0.0/22'; // This covers 192.168.0.0 to 192.168.3.255
+        $port = $portRequest ?? 4370; // Port to scan
 
-        if (empty($portRequest)) {
-            $this->port = $portRequest;
-        }else{
-            $this->port = 4370; // Port to scan
-        }
+
+
         // Define the Nmap command with optimizations
-        $command = "nmap -p $this->port -T4 -n --open $this->ip -oG -";
+        $command = "nmap -p $port -T4 -n --open $ip -oG -";
     
         // Execute the command and capture the output
         exec($command, $output, $return_var);
@@ -51,7 +61,7 @@ class ConfigController extends Controller
         if ($return_var !== 0) {
             
             return response()->json([
-                'message' => 'Error executing Nmap command.',
+                'message' => 'Error executing Nmap command.'. implode("\n", $output),
                 'status'  => false,
             ], 400);
             
@@ -73,24 +83,40 @@ class ConfigController extends Controller
         // Output the results
         if (empty($foundIPs)) {
             return response()->json([
-                'message' => 'No devices with port '.$this->port.' open found.',
+                'message' => 'No devices with port '.$port.' open found.',
                 'status'  => false,
             ], 400);
         } else {
-            return response()->json([
-                'message' => 'Found devices with port '.$this->port.' open.',
+           // Insert found IPs into the database
+           try {
+               foreach ($foundIPs as $key => $value) {
+                   if (!Config::where('user_id', auth()->id())->where('ip', $value)->exists()) {
+                       Config::create([
+                           'user_id' => auth()->id(),
+                           'ip'      => $value,
+                           'port'    => $port,
+                       ]);
+                   }
+               }
+               return response()->json([
+                'message' => 'Found devices with port '.$port.' open.',
                 'status'  => true,
                 'data'    => [
                     'ip'   => $foundIPs,
-                    'port' => $this->port
+                    'port' => $port
                 ]
             ],200);
-            // echo "Found devices with port $this->port open:\n";
-            // foreach ($foundIPs as $ip) {
-            //     echo "IP: $ip\n";
-            // }
+
+           } catch (Throwable $e) {
+               return response()->json([
+                   'message' => 'Error occurred while inserting found IPs into the database.',
+                   'status'  => false,
+                   'error'   => $e->getMessage(),
+               ], 500);
+           }
         }
     }
+
 
 
     public function list(Request $request){
@@ -126,9 +152,98 @@ class ConfigController extends Controller
 
     }
 
+    public function connect(Request $request){
 
+        $deviceInfo=[];
+        $config    =Config::query()->where('user_id', auth()->id())->whereId($request->id)->first(); 
+        $zk        =new ZKTeco($config->ip, $config->port);
+                    Config::disconnectDevice();
+      
+        if ($zk->connect()) {
+            $deviceInfo =[
+                'ip'           => $config->ip,
+                'port'         => $config->port,
+                'serial_number'=> Config::cleanDeviceInfo($zk->serialNumber()),
+                'name'         => Config::cleanDeviceInfo($zk->deviceName()),
+                'active_device'=> !$config->active_device,
+            ];
 
-    public function createUserToDevice(Request $request){
+            $config->update($deviceInfo);
+
+            return response()->json([
+                'message' => ((!$config->active_device)? 'Disconnected ' : 'Connected '). 'successfully',
+                'status'  => true,
+            ],200);
+        
+        }else{
+            return response()->json([
+                'message' => 'Connection failed. Cannot connect to device.',
+                'status'  => false,
+            ],400);
+        }
+    }
+
+    public function userDevice()
+    {
+        $checkUtilityNeeded = $this->checkUtilityNeeded();
+        return view('app.user.device.index', ['checkUtilityNeeded' => $checkUtilityNeeded]);
+    }
+
+    public function userDeviceStore(Request $request){
+        $config    = Config::query()->where('user_id', auth()->id())->where('active_device', 1)->first();
+        $zk        = new ZKTeco($config->ip, $config->port);
+        $uid       = null;
+        if ($zk->connect()) {
+
+            $userList = $zk->getUser();
+
+            if (!empty($userList)) { 
+                $lastUser = end($userList); 
+                $lastUid = $lastUser['uid']; 
+                $uid =  $lastUid + 1;
+            } else {
+                $uid = count($userList)+1;
+            }
+           
+            $setUserResult = $zk->setUser($uid, $request->userid, $request->name, null,0,0);
+
+            return response()->json([
+                'message' => 'Successfully Set User to Device.',
+                'status'  => true,
+            ],200);
+
+        }else{
+            return response()->json([
+                'message' => 'Connection failed. Cannot connect to device.',
+                'status'  => false,
+            ],400);
+        }
+    }
+
+    public function userDeviceList(Request $request){
+        
+        $config    =Config::query()->where('user_id', auth()->id())->where('active_device', 1)->first();
+        $zk        =new ZKTeco($config->ip, $config->port);
+        
+        if ($zk->connect()) {
+
+            $userList = $zk->getUser();
+            $userMap = [];
+            foreach ($userList as $user) {
+                $userId = $user['uid'] ?? null; // Ensure 'userid' exists
+                if ($userId) {
+                    $userMap[] = $user;
+                }
+            }
+            
+            return response()->json(['data' => $userMap]);
+
+        }else{
+            return response()->json([
+                'message' => 'Connection failed. Cannot connect to device.',
+                'status'  => false,
+            ],400);
+        }
 
     }
         

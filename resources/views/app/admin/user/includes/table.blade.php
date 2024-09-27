@@ -1,3 +1,4 @@
+<div class="table-responsive">
 <table id="dataTable" class="table table-hover table-sm" data-list="{{ route('app.admin.user.list') }}">
     <thead>
         <tr>
@@ -10,3 +11,4 @@
     </thead>
     <tbody></tbody>
 </table>
+</div>

@@ -13,7 +13,8 @@ public function checkUtilityNeeded()
 {
     // Retrieve the first configuration that matches the criteria
     $config = Config::where('user_id', /* specify the group_id value here */)
-                    ->where('active', 1)
+                    ->where('active', true)
+                    ->where('active_device',true)
                     ->whereNotNull('ip')
                     ->whereNotNull('port')
                     ->first();

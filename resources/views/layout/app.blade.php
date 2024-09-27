@@ -4,25 +4,35 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.rtl.min.css" integrity="sha384-gXt9imSW0VcJVHezoNQsP+TNrjYXoGcrqBZJpry9zJt8PCQjobwmhMGaDHTASo9N" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.6/css/dataTables.dataTables.min.css">
     {{-- app css --}}
     <link rel="stylesheet" href="{{ asset('css/app/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app/loading.css') }}">
  
     <title>ZkTeco</title>
   </head>
   <body>
     @include('layout.navbar')
-    <div class="p-3">
-        @yield('content')
+    <div class="p-3">  
+      @yield('content')
+      <div id="overlay" style="display:none;">
+        <div class="spinner"></div>
+        <br/>
+        Loading...
+      </div>
     </div>
 
+      <div class="preloader-wrapper" id="ajax-preloader">
+        <div class="preloader"></div>
+      </div>    
     <!-- Optional JavaScript; choose one of the two! -->
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <!-- In your layout file (e.g., resources/views/layouts/app.blade.php) -->
@@ -32,7 +42,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.6/js/dataTables.min.js"></script>
 
     <!-- Bootstrap 5 JS (optional for Bootstrap components) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>

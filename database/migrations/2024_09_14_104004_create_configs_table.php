@@ -20,8 +20,9 @@ class CreateConfigsTable extends Migration
             $table->string('name')->nullable();
             $table->string('ip')->nullable();
             $table->string('port')->nullable();
-            $table->string('serial_number');
+            $table->string('serial_number')->nullable();
             $table->boolean('active')->default(true);
+            $table->boolean('active_device')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->timestamp('deleted_at')->nullable();

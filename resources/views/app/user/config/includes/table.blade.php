@@ -1,12 +1,17 @@
-<table id="dataTable" class="table table-hover table-sm" data-list="{{ route('app.admin.config.list') }}">
+<div class="table-responsive">
+    <table id="dataTable" class="table table-hover table-sm" 
+data-list="{{ route('app.user.config.list') }}"
+data-connect="{{ route('app.user.config.connect') }}"
+>
     <thead>
         <tr>
-            <th>Device Name</th>
-            <th>Serial Number</th>
             <th>IP Address</th>
             <th>Port</th>
-            <th width="30%">Action</th>
+            <th>Device Name</th>
+            <th>Serial Number</th>
+            <th width="15%">Action</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
+</div>

@@ -35,8 +35,16 @@ Route::middleware(['auth:web', 'preventBackHistory'])->name('app.')->group(funct
     // Users
     Route::prefix('u')->name('user.')->group(function () {
         Route::get('/home', [UserController::class, 'index'])->name('home');
+        Route::get('/home/attendanceLog', [UserController::class, 'attendanceLog'])->name('home.attendanceLog');
+        Route::post('/home/upload-log', [UserController::class, 'uploadAttendanceLog'])->name('home.uploadAttendanceLog');
+        // config
         Route::get('/config', [ConfigController::class, 'index'])->name('config');
-        Route::get('/config/user/device', [UserController::class, 'userDevice'])->name('config.user.device');
+        Route::post('/config/user-device-store', [ConfigController::class, 'userDeviceStore'])->name('config.user.device.store');
+        Route::get('/config/user-device', [ConfigController::class, 'userDevice'])->name('config.user.device');
+        Route::get('/config/user-device-list', [ConfigController::class, 'userDeviceList'])->name('config.user.device.list');
+        Route::get('/config/searchIp', [ConfigController::class, 'searchIPWithPort'])->name('config.searchIp');
+        Route::get('/config/list', [ConfigController::class, 'list'])->name('config.list');
+        Route::get('/config/connect', [ConfigController::class, 'connect'])->name('config.connect');
     });
     
     // Admin
@@ -47,13 +55,14 @@ Route::middleware(['auth:web', 'preventBackHistory'])->name('app.')->group(funct
         Route::get('/user', [AdminController::class, 'user'])->name('user');
         Route::post('/user/store', [AdminController::class, 'userStore'])->name('user.store');
         Route::get('/user/list', [AdminController::class, 'userList'])->name('user.list');
+        //config
+        Route::get('/config/list', [ConfigController::class, 'list'])->name('config.list');
         //group
         Route::get('/group', [GroupController::class, 'index'])->name('group');
         Route::post('/group/store', [GroupController::class, 'store'])->name('group.store');
         Route::get('/group/list', [GroupController::class, 'list'])->name('group.list');
         Route::put('/group/update', [GroupController::class, 'update'])->name('group.update');
-        // config
-        Route::get('/config/list', [ConfigController::class, 'list'])->name('config.list');
+       
     });
     
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

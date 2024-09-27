@@ -27,19 +27,6 @@ class ConfigController extends Controller
 
     public function searchIPWithPort(Request $request){
     
-
-        $output = [];
-        exec('arp -a', $output);
-
-        // Display the output
-        foreach ($output as $line) {
-            $line . "<br>";
-        }
-
-        return response()->json([
-            'message' => $line,
-            'status'  => true,
-        ]);
         // Define network range and port
         // $network = '192.168.3.0/24';
         $ipRequest   = $request->ip;
@@ -155,7 +142,8 @@ class ConfigController extends Controller
     public function connect(Request $request){
 
         $deviceInfo=[];
-        $config    =Config::query()->where('user_id', auth()->id())->whereId($request->id)->first(); 
+        $config    =Config::query()->where('user_id', auth()->id())->whereId($request->id)->first();
+        // $zk        =new ZKTeco('192.168.3.34');
         $zk        =new ZKTeco($config->ip, $config->port);
                     Config::disconnectDevice();
       
